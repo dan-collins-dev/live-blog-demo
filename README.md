@@ -22,7 +22,7 @@ In GitBash:
 
 ## Todos
 
-- [ ] Implement file reading and saving
-- [ ] Implement retrieving all posts
-- [ ] Implement retrieving a single post by id
-- [ ] Implement creating posts
+- [X] Implement file reading and saving
+- [X] Implement retrieving all posts
+- [X] Implement retrieving a single post by id
+- [X] Implement creating posts
