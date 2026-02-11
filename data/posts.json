@@ -1,0 +1,17 @@
+[
+    {
+        "id": 1,
+        "title": "My first post",
+        "content": "This is the content of my first post!"
+    },
+    {
+        "id": 2,
+        "title": "Second post, woo!",
+        "content": "I wrote another blog post!"
+    },
+    {
+        "id": 3,
+        "title": "Blogging is hard",
+        "content": "I never have anything of value to say."
+    }
+]
