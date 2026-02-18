@@ -8,6 +8,9 @@ import fs from "fs/promises";
 const app = express();
 const port = 8080;
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -33,9 +36,9 @@ async function savePosts(data) {
     }
 }
 
-function createPost(title, content) {
+async function createPost(title, content) {
     return {
-        id: createNewId(),
+        id: await createNewId(),
         title,
         content,
     };
@@ -65,14 +68,99 @@ app.get("/:id", async (request, response) => {
         const post = posts.find(post => post.id === id);
 
         if (!post) {
-            return response.status(400).json({
-                error: "Bad Request",
+            return response.status(404).json({
+                error: "Post with that id doesn't exist",
             });
         }
 
         response.status(200).json(post);
     } catch (error) {
         console.log(error);
+    }
+});
+
+app.post("/", async (request, response) => {
+    if (!request.body) {
+        return response.status(400).json({
+            error: "Bad request. Body is missing",
+        });
+    }
+
+    if (!request.body.title || !request.body.content) {
+        return response.status(400).json({
+            error: "Bad Request. Missing title or content",
+        });
+    }
+
+    try {
+        const newPost = await createPost(
+            request.body.title,
+            request.body.content,
+        );
+
+        const posts = await getPosts();
+        posts.push(newPost);
+        await savePosts(posts);
+
+        return response.status(201).json(newPost);
+    } catch (error) {
+        console.error(error.message);
+    }
+});
+
+app.put("/:id", async (request, response) => {
+    if (!request.params.id) {
+        return response.status(404).json({
+            error: "Post with that id does not exist",
+        });
+    }
+
+    try {
+        const id = parseInt(request.params.id);
+        const posts = await getPosts();
+        const post = posts.find(post => post.id === id);
+
+        if (!post) {
+            return response.status(404).json({
+                error: "Post with that id does not exist",
+            });
+        }
+
+        if (!request.body.title || !request.body.content) {
+            return response.status(400).json({
+                error: "Bad Request. Missing title or content",
+            });
+        }
+
+        post.title = request.body.title;
+        post.content = request.body.content;
+
+        await savePosts(posts);
+
+        response.status(200).json(post);
+    } catch (error) {
+        console.error(error.message);
+    }
+});
+
+app.delete("/:id", async (request, response) => {
+    try {
+        const id = parseInt(request.params.id);
+        let posts = await getPosts();
+        const post = posts.find(post => post.id === id);
+
+        if (!post) {
+            return response.status(404).json({
+                error: "Post with that id does not exist",
+            });
+        }
+
+        posts = posts.filter(post => post.id !== id);
+        await savePosts(posts);
+
+        response.status(204).json();
+    } catch (error) {
+        console.error(error.message);
     }
 });
 
